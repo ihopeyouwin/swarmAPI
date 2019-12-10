@@ -14,6 +14,11 @@ const getUsers = (req, res, next) => {
 
 const signUp = (req, res, next) => {
   const { name, email, password } = req.body;
+  const hasUser = Dummy_Users.find(user => user.email === email);
+  if (hasUser) {
+    throw new HttpError('Could not create user, such an email already exists', 422)
+  }
+
   const createdUser = {
     id: uuid(),
     name,
@@ -21,17 +26,17 @@ const signUp = (req, res, next) => {
     password
   };
   Dummy_Users.push(createdUser);
-  res.status(201).json({user: createdUser});
+  res.status(201).json({ user: createdUser });
 };
 
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
   const identifiedUser = Dummy_Users.find(user => user.email === email);
-  if (!identifiedUser || identifiedUser.password !== password){
+  if (!identifiedUser || identifiedUser.password !== password) {
     throw new HttpError('could not identify user, credentials seem to be wrong or password is incorrect', 401)
   }
-  res.json({message: 'logged in'})
+  res.json({ message: 'logged in' })
 };
 
 exports.getUsers = getUsers;
