@@ -53,7 +53,6 @@ const signUp = async (req, res, next) => {
     res.status(201).json({user: createdUser.toObject({getters: true})});
 };
 
-
 const login = async (req, res, next) => {
     const {email, password} = req.body;
 
@@ -63,7 +62,6 @@ const login = async (req, res, next) => {
     } catch (err) {
         return next(new HttpError('something went wrong, logging in failed', 500));
     }
-
 
     if (!existingUser || existingUser.password !== password) {
         return next(new HttpError('could not identify user, credentials seem to be wrong or password is incorrect', 401))

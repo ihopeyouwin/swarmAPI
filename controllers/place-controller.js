@@ -1,7 +1,9 @@
 const HttpError = require('../models/http-error');
 const {validationResult} = require('express-validator');
+const mongoose = require('mongoose');
 const getCoordsForAddress = require('../util/location');
 const Place = require('../models/place');
+const User = require('../models/user');
 
 let Dummy_Data = [
     {
@@ -87,15 +89,27 @@ const createPlace = async (req, res, next) => {
         image: 'https://vignette.wikia.nocookie.net/starcraft/images/e/ee/Kaldir_SC2_Art3.jpg/revision/latest/scale-to-width-down/1000?cb=20120915203530',
         creator
     });
+    let user;
     try {
-        await createdPlace.save();
+        user = await User.findById(creator)
     } catch (err) {
-        const error = new HttpError(
-          'Creating place failed, please check data',
-          500
-        );
-        return next(error)
+        return next(new HttpError('creating place failed, try again', 500));
     }
+    if (!user) {
+        return next(new HttpError('could not find user for provided id', 404));
+    }
+
+    try {
+        const sess = await mongoose.startSession();
+        sess.startTransaction();
+        await createdPlace.save({session: sess});
+        user.places.push(createdPlace);
+        await user.save({session: sess});
+        await sess.commitTransaction();
+    } catch (err) {
+        return next(new HttpError('Creating place failed, please check data', 500));
+    }
+
     res.status(201).json({place: createdPlace})
 };
 
@@ -129,13 +143,22 @@ const deletePlace = async (req, res, next) => {
 
     let place;
     try {
-        place = await Place.findById(placeId)
+        place = await Place.findById(placeId).populate('creator')
     } catch (err) {
         return next(new HttpError('something went wrong, could not find place with that id', 500));
     }
 
+    if(!place) {
+        return next(new HttpError('the place with such an id does not exist', 404));
+    }
+
     try {
-        await place.remove();
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        await place.remove({session});
+        place.creator.places.pull(place);
+        await place.creator.save({session});
+        await session.commitTransaction()
     } catch (err) {
         return next(new HttpError('something went wrong, could not delete place with that id', 500));
     }
