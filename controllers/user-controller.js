@@ -35,7 +35,7 @@ const signUp = async (req, res, next) => {
     const createdUser = new User({
         name,
         email,
-        image: 'https://www.google.com/url?sa=i&source=images&cd=&ved=2ahUKEwiG5uj8pYDnAhUCCewKHXXSCr4QjRx6BAgBEAQ&url=https%3A%2F%2Fwww.freepik.com%2Ffree-icon%2Fuser-image-with-black-background_751548.htm&psig=AOvVaw2cUk2l-h7FPUNoYoH_aQRE&ust=1578995290761992',
+        image: 'https://image.flaticon.com/icons/png/512/83/83855.png',
         password,
         places: []
     });
@@ -62,11 +62,13 @@ const login = async (req, res, next) => {
     } catch (err) {
         return next(new HttpError('something went wrong, logging in failed', 500));
     }
-
     if (!existingUser || existingUser.password !== password) {
         return next(new HttpError('could not identify user, credentials seem to be wrong or password is incorrect', 401))
     }
-    res.json({message: 'logged in'})
+    res.json({
+        message: 'logged in',
+        user: existingUser.toObject({getters: true})
+    })
 };
 
 exports.getUsers = getUsers;
