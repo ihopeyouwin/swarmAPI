@@ -86,7 +86,7 @@ const createPlace = async (req, res, next) => {
         description,
         address,
         location: coordinates,
-        image: 'https://vignette.wikia.nocookie.net/starcraft/images/e/ee/Kaldir_SC2_Art3.jpg/revision/latest/scale-to-width-down/1000?cb=20120915203530',
+        image: req.file.path,
         creator
     });
     let user;

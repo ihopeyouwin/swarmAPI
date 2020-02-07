@@ -35,7 +35,7 @@ const signUp = async (req, res, next) => {
     const createdUser = new User({
         name,
         email,
-        image: 'https://image.flaticon.com/icons/png/512/83/83855.png',
+        image: req.file.path,
         password,
         places: []
     });
