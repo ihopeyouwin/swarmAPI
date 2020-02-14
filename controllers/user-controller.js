@@ -84,7 +84,7 @@ const login = async (req, res, next) => {
         return next(new HttpError('something went wrong, logging in failed', 500));
     }
     if (!existingUser) {
-        return next(new HttpError('could not identify user, credentials seem to be wrong or password is incorrect', 401))
+        return next(new HttpError('could not identify user, credentials seem to be wrong or password is incorrect', 403))
     }
     let isPasswordCorrect;
     try {
@@ -93,7 +93,7 @@ const login = async (req, res, next) => {
         return next(new HttpError('something went wrong, logging in failed, check credentials and try again', 500));
     }
     if (!isPasswordCorrect) {
-        return next(new HttpError('credentials seem to be wrong or password is incorrect', 401))
+        return next(new HttpError('credentials seem to be wrong or password is incorrect', 403))
     }
 
     let token;

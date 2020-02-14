@@ -6,7 +6,7 @@ const getCoordsForAddress = require('../util/location');
 const Place = require('../models/place');
 const User = require('../models/user');
 
-let Dummy_Data = [
+/*let Dummy_Data = [
     {
         id: 'p1',
         title: 'char',
@@ -31,7 +31,7 @@ let Dummy_Data = [
         },
         creator: 'u3'
     }
-];
+];*/
 
 const getPlaceById = async (req, res, next) => {
     const placeId = req.params.pid;
@@ -74,7 +74,7 @@ const createPlace = async (req, res, next) => {
         );
     }
 
-    const {title, description, address, creator} = req.body;
+    const {title, description, address} = req.body;
     let coordinates;
     try {
         coordinates = await getCoordsForAddress(address);
@@ -88,11 +88,11 @@ const createPlace = async (req, res, next) => {
         address,
         location: coordinates,
         image: req.file.path,
-        creator
+        creator: req.userData.userId
     });
     let user;
     try {
-        user = await User.findById(creator)
+        user = await User.findById(createdPlace.creator)
     } catch (err) {
         return next(new HttpError('creating place failed, try again', 500));
     }
@@ -129,6 +129,10 @@ const updatePlace = async (req, res, next) => {
         return next(new HttpError('something went wrong, could not update place', 500));
     }
 
+    if (place.creator.toString() !== req.userData.userId){
+        return next(new HttpError('you are not allowed to edit that place', 401));
+    }
+
     place.title = title;
     place.description = description;
     try {
@@ -152,8 +156,11 @@ const deletePlace = async (req, res, next) => {
     if(!place) {
         return next(new HttpError('the place with such an id does not exist', 404));
     }
-    const imagePath = place.image;
+    if (place.creator.id !== req.userData.userId) {
+        return next(new HttpError('you are not allowed to delete that place', 401));
+    }
 
+    const imagePath = place.image;
 
     try {
         const session = await mongoose.startSession();
