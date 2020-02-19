@@ -1,7 +1,7 @@
 {
   "env": {
     "DB_USER": "kerri",
-    "DB_PASSWIRD": "badass_911",
+    "DB_PASSWORD": "badass_911",
     "DB_NAME": "mern",
     "GOOGLE_API_KEY": "AIzaSyDLZZUu0SN2QZY-PeNDB93HsSttScak4UY",
     "JWT_KEY": "super_secret_dont_share"
